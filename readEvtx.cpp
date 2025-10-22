@@ -82,7 +82,9 @@ int main(int argc, char ** argv) {
             std::wstring xml(xmlBuffer.data(), bufferUsed / sizeof(wchar_t));
             std::string xml_utf8 = WStringToUtf8(xml);
 
-            // Construct simple JSON object
+            std::cout << xml_utf8 << std::endl;
+
+            
             json j;
             j["xml"] = xml_utf8;
 
