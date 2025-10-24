@@ -1,6 +1,5 @@
 import subprocess
 import os
-from os import path
 import time
 import threading
 import ctypes
@@ -8,41 +7,29 @@ import sys
 import socket
 
 uuid = os.getlogin() + "_" + socket.gethostname()
-MAX_SIZE = 100 * 1024 * 1024 # 100mb
 
-def split_json_lines(input_file, output_folder):
-    os.makedirs(output_folder, exist_ok=True)
-    chunk = []
-    chunk_index = 1
-    current_size = 0
-
-    filename = input_file.replace('.json', '')
-
-    with open(input_file, "r", encoding="utf-8") as f:
-        for line in f:
-            line_size = len(line.encode("utf-8"))
-            if current_size + line_size > MAX_SIZE:
-                output_file = os.path.join(output_folder, f"${filename}_{chunk_index}.json")
-                with open(output_file, "w", encoding="utf-8") as out:
-                    out.writelines(chunk)
-                chunk_index += 1
-                chunk = []
-                current_size = 0
-            chunk.append(line)
-            current_size += line_size
-
-    if chunk:
-        output_file = os.path.join(output_folder, f"${filename}_{chunk_index}.json")
-        with open(output_file, "w", encoding="utf-8") as out:
-            out.writelines(chunk)
-
-def run(alert, outFile):
-    wevtutilFetch = ["wevtutil", "epl", alert, outFile]
+def run(alert, outFile, parsed):
+    wevtutilFetch = ["wevtutil", "epl", alert, f"{outFile}.evtx"]
     wevtutilDelete = ["wevtutil", "cl", alert]
-    convertEvtx = ["readEvtx.exe", outFile]
+    readEvtx = ["readEvtx.exe", f"{outFile}.evtx"]
+    parse = ["evtx2json.exe", f"{outFile}.json", f"{parsed}"]
+    verify = ["python3", "validator.py", f"{parsed}"]
+
     subprocess.run(wevtutilFetch, check=True)
-    subprocess.run(convertEvtx, check=True)
+    subprocess.run(readEvtx, check=True)
     subprocess.run(wevtutilDelete, check=True)
+
+    parse_log = f"{parsed}_parse.log"
+    verify_log = f"{parsed}_verify.log"
+
+    with open(parse_log, "a") as p_log:
+        subprocess.run(parse, check=True, stdout=p_log, stderr=p_log)
+
+    with open(verify_log, "a") as v_log:
+        subprocess.run(verify, check=True, stdout=v_log, stderr=v_log)
+
+def logging(path, timestamp):
+    print(os.listdir(path))
 
 def is_admin():
     try:
@@ -60,14 +47,16 @@ if not is_admin():
 alerts = ["Security", "Application", "System"]
 
 ts = time.strftime("%Y-%m-%d_%H-%M-%S")
-dir = path.dirname(path.realpath(__file__))
-outDir = path.join(dir, "logs", uuid)
+dir = os.path.dirname(os.path.realpath(__file__))
+outDir = os.path.join(dir, "logs", uuid)
 os.makedirs(outDir, exist_ok=True)
 
 threads = []
 for alert in alerts:
-    outFile = path.join(outDir, f"{ts}_{alert}.evtx")
-    t = threading.Thread(target=run, args=(alert, outFile))
+    outFile = os.path.join(outDir, f"{ts}_{alert}").replace("\\", "/")
+    parsedFile = os.path.join(outDir, "parsed", f"{ts}_{alert}.json").replace("\\", "/")
+    
+    t = threading.Thread(target=run, args=(alert, outFile, parsedFile))
     t.start()
     threads.append(t)
 

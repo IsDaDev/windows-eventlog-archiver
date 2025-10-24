@@ -82,7 +82,7 @@ int main(int argc, char ** argv) {
             std::wstring xml(xmlBuffer.data(), bufferUsed / sizeof(wchar_t));
             std::string xml_utf8 = WStringToUtf8(xml);
 
-            std::cout << xml_utf8 << std::endl;
+            // std::cout << xml_utf8 << std::endl;
 
             
             json j;
@@ -100,6 +100,6 @@ int main(int argc, char ** argv) {
     EvtClose(hQuery);
     outFile.close();
 
-    std::cout << "JSON written to " << outputPath << std::endl;
+    // std::cout << "JSON written to " << outputPath << std::endl;
     return 0;
 }
