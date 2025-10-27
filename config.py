@@ -14,6 +14,7 @@ chunkSize = 100 * 1024 * 1024 # 100mb
 
 # ======================================================================
 # paths are based on the file location of the executable file by default
+# since its a windows tool, only windows paths are allowed, e.g. C:/...
 # ======================================================================
 
 # base path, default where the executable lies
