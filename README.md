@@ -1,6 +1,6 @@
 # Windows Event Log Archiver
 
-A Python + C++ tool to automatically dump, parse, and upload Windows EVTX event logs to Azure Blob Storage for long-term retention.
+A Python + C++ tool to automatically dump, parse, and archive Windows EVTX event logs. They are being saved as a zip file and can later be uploaded to an Azure Blob Storage for long-time retention (work in progress).
 
 ## Layout
 
