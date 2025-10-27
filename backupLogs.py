@@ -16,11 +16,6 @@ pjoin = os.path.join
 
 ts = time.strftime("%Y-%m-%d_%H-%M-%S")
 
-os.makedirs(config.logDirectory, exist_ok=True)
-os.makedirs(config.rawDirectory, exist_ok=True)
-os.makedirs(config.parsedDirectory, exist_ok=True)
-os.makedirs(config.zipDirectory, exist_ok=True)
-
 def clearDirectory():
     files = os.listdir(config.rawDirectory)
 
@@ -41,9 +36,9 @@ def createZip(files, timestamp):
 def executeEVTX(alert, outFile, parsed):
     wevtutilFetch = ["wevtutil", "epl", alert, f"{outFile}.evtx"]
     wevtutilDelete = ["wevtutil", "cl", alert]
-    readEvtx = ["readEvtx.exe", f"{outFile}.evtx"]
-    parse = ["evtx2json.exe", f"{outFile}.json", f"{parsed}"]
-    verify = ["python3", "validator.py", f"{parsed}"]
+    readEvtx = ["native/readEvtx.exe", f"{outFile}.evtx"]
+    parse = ["native/evtx2json.exe", f"{outFile}.json", f"{parsed}"]
+    verify = ["python3", "src/validator.py", f"{parsed}"]
 
     subprocess.run(wevtutilFetch, check=True)
     subprocess.run(readEvtx, check=True)
@@ -72,9 +67,17 @@ def is_admin():
         return False
 
 def main():
+    if not os.path.isfile("native/evtx2json.exe") or not os.path.isfile("native/evtx2json.exe"):
+        sys.exit("Run make first")
+
     if not is_admin():
         print("Run as administrator")
         sys.exit()
+
+    os.makedirs(config.logDirectory, exist_ok=True)
+    os.makedirs(config.rawDirectory, exist_ok=True)
+    os.makedirs(config.parsedDirectory, exist_ok=True)
+    os.makedirs(config.zipDirectory, exist_ok=True)
 
     threads = []
     for alert in config.logTypes:
