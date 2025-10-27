@@ -38,7 +38,7 @@ def createZip(files, timestamp):
     zipPath = f"{zipDirectory}/{timestamp}_{uuid}.zip"
     with zipfile.ZipFile(zipPath, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
         for file in files:
-            abs_path = pjoin(os.path.abspath(parsedDirectory), file)
+            abs_path = pjoin(parsedDirectory, file)
             zipf.write(abs_path, arcname=file)
             os.remove(abs_path)
     print("Zip file created!")
