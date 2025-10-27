@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "json.hpp"
+#include "headers/json.hpp"
 #pragma comment(lib, "wevtapi.lib")
 
 using json = nlohmann::json;
