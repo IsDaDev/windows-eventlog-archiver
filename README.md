@@ -7,25 +7,27 @@ The parser used is a modified version of this one: [xml2jsonParser](https://gith
 ## Layout
 
 ```
-windows-eventlog-archiver/
+.
 │
 ├── backupLogs.py               # Main script – exports, parses, validates, and archives EVTX logs
-├── config.py                # Configuration file
+├── config.py                   # Configuration file
 ├── validator.py                # Validates JSON output for correctness
-├── readEvtx.cpp                # Reads Windows Event Logs (.evtx) and dumps as plaintext
-├── evtx2json.cpp               # Converts raw EVTX data to structured JSON
+├── Makefile                    # Build script for the native binaries
+├── README.md                   # Build script for the native binaries
+├── .gitignore                  # Build script for the native binaries
 │
-├── headers/                    # Containing header files
-│   └── nlohmann/json.hpp       # Headerfile for jsondump
+├── native/                     # Compiled binaries and source code
+│   ├── evtx2json.cpp
+│   ├── readEvtx.cpp
+│   └── headers/
+│       └── json.hpp
 │
 ├── logs/                       # Working directory for log exports
-│   └── <user>_<hostname>/      # Automatically created per machine
-│       ├── raw/                # Temporary .evtx files
-│       └── parsed/             # Converted .json log files
+│   └── <username>_<hostname>/
+│       ├── raw/                # Raw EVTX files
+│       └── parsed/             # Converted JSON log files
 │
-├── zips/                       # Final archived backups (zipped JSON logs)
-│
-└── README.md                   # Documentation
+└── zips/                       # Final archived backups (zipped JSON logs)
 ```
 
 ### Directory explanations
@@ -65,6 +67,7 @@ chunkSize = 100 * 1024 * 1024 # 100mb
 
 # ======================================================================
 # paths are based on the file location of the executable file by default
+# since its a windows tool, only windows paths are allowed, e.g. C:/...
 # ======================================================================
 
 # base path, default where the executable lies
@@ -84,14 +87,14 @@ zipDirectory = path.join(basePath, "zips")
 ### Prerequesites
 
 - g++ (MinGW or MSVC)
+- make
 - Python3
 
 ### Commands
 
 ```shell
 cd windows-eventlog-archiver
-g++ readEvtx.cpp -o readEvtx -lwevtapi
-g++ evtx2json.cpp -o evtx2json
+make
 ```
 
 ### Execute
