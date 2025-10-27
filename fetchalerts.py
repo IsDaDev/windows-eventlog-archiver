@@ -5,10 +5,45 @@ import threading
 import ctypes
 import sys
 import socket
+import zipfile
 
 uuid = os.getlogin() + "_" + socket.gethostname()
+basePath = os.path.dirname(os.path.realpath(__file__))
 
-def run(alert, outFile, parsed):
+pjoin = os.path.join
+
+logDirectory = pjoin(basePath, "logs", uuid)
+rawDirectory = pjoin(logDirectory, "raw")
+parsedDirectory = pjoin(logDirectory, "parsed")
+zipDirectory = pjoin(basePath, "zips")
+
+alerts = ["Security", "Application", "System"]
+
+ts = time.strftime("%Y-%m-%d_%H-%M-%S")
+
+os.makedirs(logDirectory, exist_ok=True)
+os.makedirs(rawDirectory, exist_ok=True)
+os.makedirs(parsedDirectory, exist_ok=True)
+os.makedirs(zipDirectory, exist_ok=True)
+
+def clearDirectory():
+    files = os.listdir(rawDirectory)
+
+    for file in files:
+        p = pjoin(rawDirectory, file)
+        os.remove(p)
+
+def createZip(files, timestamp):
+    print("Creating zip file ...")
+    zipPath = f"{zipDirectory}/{timestamp}_{uuid}.zip"
+    with zipfile.ZipFile(zipPath, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        for file in files:
+            abs_path = pjoin(os.path.abspath(parsedDirectory), file)
+            zipf.write(abs_path, arcname=file)
+            os.remove(abs_path)
+    print("Zip file created!")
+
+def executeEVTX(alert, outFile, parsed):
     wevtutilFetch = ["wevtutil", "epl", alert, f"{outFile}.evtx"]
     wevtutilDelete = ["wevtutil", "cl", alert]
     readEvtx = ["readEvtx.exe", f"{outFile}.evtx"]
@@ -18,18 +53,24 @@ def run(alert, outFile, parsed):
     subprocess.run(wevtutilFetch, check=True)
     subprocess.run(readEvtx, check=True)
     subprocess.run(wevtutilDelete, check=True)
+    subprocess.run(parse, check=True)
+    subprocess.run(verify, check=True)
 
-    parse_log = f"{parsed}_parse.log"
-    verify_log = f"{parsed}_verify.log"
+def startUploadIfOK(timestamp):
+    BLOBSIZE = 100 * 1024 * 1024 # 100mb
 
-    with open(parse_log, "a") as p_log:
-        subprocess.run(parse, check=True, stdout=p_log, stderr=p_log)
+    files = os.listdir(parsedDirectory)
+    size = 0
+    for file in files:
+        size += os.path.getsize(pjoin(parsedDirectory, file))
+    
+    clearDirectory()
 
-    with open(verify_log, "a") as v_log:
-        subprocess.run(verify, check=True, stdout=v_log, stderr=v_log)
-
-def logging(path, timestamp):
-    print(os.listdir(path))
+    if size >= BLOBSIZE:
+        print("Uploading ...") 
+        createZip(files, timestamp)
+    else:
+        print("File size:", size / 1024 / 1024, "mb", "\nNo file upload")
 
 def is_admin():
     try:
@@ -37,28 +78,24 @@ def is_admin():
     except:
         return False
 
-if not is_admin():
-    ctypes.windll.shell32.ShellExecuteW(
-        None, "runas", sys.executable, " ".join(sys.argv), None, 1
-    )
-    sys.exit()
+def main():
+    if not is_admin():
+        print("Run as administrator")
+        sys.exit()
 
+    threads = []
+    for alert in alerts:
+        rawFilePath = pjoin(rawDirectory, f"{ts}_{alert}").replace("\\", "/")
+        parsedFilePath = pjoin(parsedDirectory, f"{ts}_{alert}.json").replace("\\", "/")
+        
+        t = threading.Thread(target=executeEVTX, args=(alert, rawFilePath, parsedFilePath))
+        t.start()
+        threads.append(t)
 
-alerts = ["Security", "Application", "System"]
+    for t in threads:
+        t.join()
 
-ts = time.strftime("%Y-%m-%d_%H-%M-%S")
-dir = os.path.dirname(os.path.realpath(__file__))
-outDir = os.path.join(dir, "logs", uuid)
-os.makedirs(outDir, exist_ok=True)
+    startUploadIfOK(ts)
 
-threads = []
-for alert in alerts:
-    outFile = os.path.join(outDir, f"{ts}_{alert}").replace("\\", "/")
-    parsedFile = os.path.join(outDir, "parsed", f"{ts}_{alert}.json").replace("\\", "/")
-    
-    t = threading.Thread(target=run, args=(alert, outFile, parsedFile))
-    t.start()
-    threads.append(t)
-
-for t in threads:
-    t.join()
+if __name__ == "__main__":
+    main()

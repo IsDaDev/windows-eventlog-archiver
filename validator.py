@@ -22,4 +22,4 @@ with open(sys.argv[1]) as f:
             print(line)
             print(message)
 
-print(f"{sys.argv[1]} // Total: {total} | Failed: {false}")
+print(f"Validating file {sys.argv[1]} for validity\nTotal entires: {total} | Invalid: {false}")
