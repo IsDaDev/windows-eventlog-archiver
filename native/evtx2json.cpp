@@ -376,7 +376,7 @@ int main(int argc, char** argv)
 
     std::chrono::duration < double > duration = end - start;
 
-    std::cout << "Ran file " << argv[1] << " in " << duration.count() << " seconds" << std::endl;
+    std::cout << "Converted file " << argv[1] << " in " << duration.count() << " seconds" << std::endl;
 
     return 0;
 }
