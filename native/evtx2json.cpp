@@ -1,3 +1,7 @@
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wparentheses"
+#pragma GCC diagnostic ignored "-Wrange-loop-construct"
+
 #include <iostream>
 #include <string>
 #include <vector>
