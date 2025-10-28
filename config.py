@@ -1,9 +1,8 @@
-from os import path
-import os
-import socket
+from os import path, getlogin
+from socket import gethostname
 
 # Unique Identifier if multiple logs are safed at the same destination
-uuid = os.getlogin() + "_" + socket.gethostname()
+uuid = getlogin() + "_" + gethostname()
 
 # array containing all logs to collect
 logTypes = ["Security", "Application", "System"]
@@ -32,7 +31,7 @@ accountUrl = "https://example.blob.core.windows.net/"
 # storage container
 container = "example"
 
-# toggle if zip files should be deleted after uploading
+# toggle if zip files should be kept locally after uploading
 retainZipLocally = True
 
 # ======================================================================

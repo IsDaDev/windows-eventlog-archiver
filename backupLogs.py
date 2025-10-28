@@ -1,3 +1,6 @@
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient
+import config
 import subprocess
 import os
 import time
@@ -6,15 +9,9 @@ import ctypes
 import sys
 import socket
 import zipfile
-from azure.identity import DefaultAzureCredential
-from azure.storage.blob import BlobServiceClient, ContainerClient, BlobBlock, BlobClient, StandardBlobTier
-import config
 
 credential = DefaultAzureCredential()
 blob_service_client = BlobServiceClient(config.accountUrl, credential=credential)
-
-uuid = os.getlogin() + "_" + socket.gethostname()
-basePath = os.path.dirname(os.path.realpath(__file__))
 
 pjoin = os.path.join
 
@@ -76,7 +73,8 @@ def startUploadIfOK(timestamp):
     for file in files:
         size += os.path.getsize(pjoin(config.parsedDirectory, file))
     
-    # clearDirectory()
+    # clearing raw files
+    clearDirectory()
 
     if size >= config.chunkSize:
         print(f"File size: {size / 1024 / 1024:.2f}mb")
