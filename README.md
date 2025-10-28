@@ -13,9 +13,9 @@ The parser used is a modified version of this one: [xml2jsonParser](https://gith
 ├── config.py                   # Configuration file
 ├── validator.py                # Validates JSON output for correctness
 ├── Makefile                    # Build script for the native binaries
-├── README.md
-├── .gitignore
-├── requirements.txt
+├── requirements.txt            # Requirements for python
+├── README.md                   # The file you are currently reading
+├── .gitignore                  # Ignored directories
 │
 ├── native/                     # Compiled binaries and source code
 │   ├── evtx2json.cpp           # XML->JSON parser
