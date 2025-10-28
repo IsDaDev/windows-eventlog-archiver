@@ -15,7 +15,7 @@ all: $(TARGETS)
 
 # Build evtx2json
 $(NATIVE_DIR)/evtx2json.exe: $(NATIVE_DIR)/evtx2json.cpp
-	$(CXX) $(CXXFLAGS) -I$(NATIVE_DIR)/headers $< -o $@ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) -I$(NATIVE_DIR)/headers $< -o $@ $(LDFLAGS) -O2 -fno-builtin -fomit-frame-pointer -fstrength-reduce
 
 # Build readEvtx
 $(NATIVE_DIR)/readEvtx.exe: $(NATIVE_DIR)/readEvtx.cpp
