@@ -11,6 +11,29 @@ logTypes = ["Security", "Application", "System"]
 # max filesize before they get zipped in mb
 chunkSize = 100 * 1024 * 1024 # 100mb
 
+# how far archives should be compressed
+# level 1: 200mb -> 10-15mb
+# level 9: 200mb -> 6-8mb
+compressionsLevel = 9
+
+# toggle if 0mb files should be included
+includeEmptyFiles = False
+
+# ======================================================================
+# file upload to a Microsoft Azure Blob Storage
+# ======================================================================
+
+# file upload to Microsoft Azure Blob Storage
+uploadToAzure = False
+
+# full storage account url 
+accountUrl = "https://example.blob.core.windows.net/"
+
+# storage container
+container = "example"
+
+# toggle if zip files should be deleted after uploading
+retainZipLocally = True
 
 # ======================================================================
 # paths are based on the file location of the executable file by default

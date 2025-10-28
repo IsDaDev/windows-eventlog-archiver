@@ -6,8 +6,12 @@ import ctypes
 import sys
 import socket
 import zipfile
-
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient, ContainerClient, BlobBlock, BlobClient, StandardBlobTier
 import config
+
+credential = DefaultAzureCredential()
+blob_service_client = BlobServiceClient(config.accountUrl, credential=credential)
 
 uuid = os.getlogin() + "_" + socket.gethostname()
 basePath = os.path.dirname(os.path.realpath(__file__))
@@ -15,6 +19,12 @@ basePath = os.path.dirname(os.path.realpath(__file__))
 pjoin = os.path.join
 
 ts = time.strftime("%Y-%m-%d_%H-%M-%S")
+
+def upload_blob_file(blob_service_client: BlobServiceClient, container_name: str, file_path: str):
+    container_client = blob_service_client.get_container_client(container=container_name)
+    blob_name = os.path.basename(file_path)
+    with open(file=file_path, mode="rb") as data:
+        container_client.upload_blob(name=blob_name, data=data, overwrite=True)
 
 def clearDirectory():
     files = os.listdir(config.rawDirectory)
@@ -26,12 +36,26 @@ def clearDirectory():
 def createZip(files, timestamp):
     print("Creating zip file ...")
     zipPath = f"{config.zipDirectory}/{timestamp}_{config.uuid}.zip"
-    with zipfile.ZipFile(zipPath, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+    with zipfile.ZipFile(zipPath, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=config.compressionsLevel) as zipf:
         for file in files:
             abs_path = pjoin(config.parsedDirectory, file)
-            zipf.write(abs_path, arcname=file)
+
+            if config.includeEmptyFiles:
+                zipf.write(abs_path, arcname=file)
+            else:
+                if os.path.getsize(abs_path) != 0:
+                    zipf.write(abs_path, arcname=file)
+
             os.remove(abs_path)
+    
     print("Zip file created!")
+
+    if config.uploadToAzure:
+        print(f"Uploading to {config.accountUrl}{config.container}") 
+        upload_blob_file(blob_service_client, config.container, zipPath)
+        if not config.retainZipLocally:
+            print("Removing Zip file")
+            os.remove(zipPath)
 
 def executeEVTX(alert, outFile, parsed):
     wevtutilFetch = ["wevtutil", "epl", alert, f"{outFile}.evtx"]
@@ -52,13 +76,13 @@ def startUploadIfOK(timestamp):
     for file in files:
         size += os.path.getsize(pjoin(config.parsedDirectory, file))
     
-    clearDirectory()
+    # clearDirectory()
 
     if size >= config.chunkSize:
-        print("Uploading ...") 
+        print(f"File size: {size / 1024 / 1024:.2f}mb")
         createZip(files, timestamp)
     else:
-        print("File size:", size / 1024 / 1024, "mb", "\nNo file upload")
+        print(f"File size: {size / 1024 / 1024:.2f}mb\nNo file upload")
 
 def is_admin():
     try:

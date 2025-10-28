@@ -1,6 +1,6 @@
 # Windows Event Log Archiver
 
-A Python + C++ tool to automatically dump, parse, and archive Windows EVTX event logs. They are being saved as a zip file and can later be uploaded to an Azure Blob Storage for long-time retention (work in progress).
+A Python + C++ tool to automatically dump, parse, and archive Windows EVTX event logs. They are being saved as a zip file and can later be uploaded to an Azure Blob Storage for long-time retention (if configured).
 
 The parser used is a modified version of this one: [xml2jsonParser](https://github.com/IsDaDev/xml2jsonParser)
 
@@ -13,12 +13,13 @@ The parser used is a modified version of this one: [xml2jsonParser](https://gith
 ├── config.py                   # Configuration file
 ├── validator.py                # Validates JSON output for correctness
 ├── Makefile                    # Build script for the native binaries
-├── README.md                   
-├── .gitignore                   
+├── README.md
+├── .gitignore
+├── requirements.txt
 │
 ├── native/                     # Compiled binaries and source code
 │   ├── evtx2json.cpp           # XML->JSON parser
-│   ├── readEvtx.cpp            # Convert EVTX to XML 
+│   ├── readEvtx.cpp            # Convert EVTX to XML
 │   └── headers/
 │       └── json.hpp            # Important Header for readEvtx.cpp
 │
@@ -48,41 +49,13 @@ The parser used is a modified version of this one: [xml2jsonParser](https://gith
 
 ### Configuration-file
 
-`sample`
+You can configure multiple settings in the configuration file `config.py` like compression, filepaths and if you want to upload the logs to a Azure Blob Storage you also have to configure the credentials for that storage account.
 
-```python
-from os import path
-import os
-import socket
+### If you want to upload toa storage account
 
-# Unique Identifier if multiple logs are used and uploaded to the same destination
-uuid = os.getlogin() + "_" + socket.gethostname()
-
-# array containing all logs to collect
-logTypes = ["Security", "Application", "System"]
-
-# max filesize before they get zipped
-chunkSize = 100 * 1024 * 1024 # 100mb
-
-
-# ======================================================================
-# paths are based on the file location of the executable file by default
-# since its a windows tool, only windows paths are allowed, e.g. C:/...
-# ======================================================================
-
-# base path, default where the executable lies
-basePath = path.abspath(path.dirname(__file__))
-
-# location where the logs are safed
-logDirectory = path.join(basePath, "logs", uuid)
-
-# location of raw logs and the parsed logs, default location is inside the logdirectory and UUID
-rawDirectory = path.join(logDirectory, "raw")
-parsedDirectory = path.join(logDirectory, "parsed")
-
-# location for the finished zip files
-zipDirectory = path.join(basePath, "zips")
-```
+1. Create Storage account
+2. Create Container
+3. Change configurations in `config.py`
 
 ### Prerequesites
 
@@ -94,6 +67,7 @@ zipDirectory = path.join(basePath, "zips")
 
 ```shell
 cd windows-eventlog-archiver
+pip install -r requirements.txt
 make
 ```
 
