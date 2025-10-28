@@ -1,7 +1,7 @@
 from os import path, getlogin
 from socket import gethostname
 
-# Unique Identifier if multiple logs are safed at the same destination
+# unique Identifier if multiple logs are saved at the same destination
 uuid                = getlogin() + "_" + gethostname()
 
 # array containing all logs to collect
