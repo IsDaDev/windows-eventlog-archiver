@@ -38,7 +38,7 @@ The parser used is a modified version of this one: [xml2jsonParser](https://gith
 
 ## Function
 
-1. Dumps all EVTX-logs specified in `backupLogs.py` in the `alerts`-array into logs/<username>\_<hostname>. By default this includes Application, System, Security.
+1. Dumps all EVTX-logs specified in `backupLogs.py` in the `alerts`-array into logs/\<username\>\_\<hostname\>. By default this includes Application, System, Security.
 2. Logs are then read by `readEvtx.exe` and dumped as a readable format.
 3. Logs are converted into valid JSON by `evtx2json.exe` and validated by `validator.py`.
 4. Checks the size of the aggregated logs
