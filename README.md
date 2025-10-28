@@ -13,14 +13,14 @@ The parser used is a modified version of this one: [xml2jsonParser](https://gith
 ├── config.py                   # Configuration file
 ├── validator.py                # Validates JSON output for correctness
 ├── Makefile                    # Build script for the native binaries
-├── README.md                   # Build script for the native binaries
-├── .gitignore                  # Build script for the native binaries
+├── README.md                   
+├── .gitignore                   
 │
 ├── native/                     # Compiled binaries and source code
-│   ├── evtx2json.cpp
-│   ├── readEvtx.cpp
+│   ├── evtx2json.cpp           # XML->JSON parser
+│   ├── readEvtx.cpp            # Convert EVTX to XML 
 │   └── headers/
-│       └── json.hpp
+│       └── json.hpp            # Important Header for readEvtx.cpp
 │
 ├── logs/                       # Working directory for log exports
 │   └── <username>_<hostname>/
@@ -55,13 +55,13 @@ from os import path
 import os
 import socket
 
-# Unique Identifier if multiple logs are safed at the same destination
+# Unique Identifier if multiple logs are used and uploaded to the same destination
 uuid = os.getlogin() + "_" + socket.gethostname()
 
 # array containing all logs to collect
 logTypes = ["Security", "Application", "System"]
 
-# max filesize before they get zipped in mb
+# max filesize before they get zipped
 chunkSize = 100 * 1024 * 1024 # 100mb
 
 
