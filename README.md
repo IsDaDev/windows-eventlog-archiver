@@ -39,11 +39,11 @@ The parser used is a modified version of this one: [xml2jsonParser](https://gith
 ## Function
 
 1. Dumps all EVTX-logs specified in `backupLogs.py` in the `alerts`-array into logs/\<username\>\_\<hostname\>. By default this includes Application, System, Security.
-2. Logs are then read by `readEvtx.exe` and dumped as a readable format.
+2. Logs are then read by `readEvtx.exe` and dumped into a json-wrapped XML element.
 3. Logs are converted into valid JSON by `evtx2json.exe` and validated by `validator.py`.
 4. Checks the size of the aggregated logs
-   - If the size of all aggregated files is less than 100mb it skips
-   - If the size is greater than 100mb, the files are zipped
+   - Size of logs < Size specified in `config.py`: just saves the logs for now
+   - Size of logs > Size specified in `config.py`: logs get zipped and / or uploaded to blob-storage
 
 ## How to install and run
 
@@ -51,11 +51,12 @@ The parser used is a modified version of this one: [xml2jsonParser](https://gith
 
 You can configure multiple settings in the configuration file `config.py` like compression, filepaths and if you want to upload the logs to a Azure Blob Storage you also have to configure the credentials for that storage account.
 
-### If you want to upload toa storage account
+### If you want to upload to a Microsoft blob-storage
 
-1. Create Storage account
-2. Create Container
-3. Change configurations in `config.py`
+1. Create Resource Group (if not existing)
+2. Create Storage account
+3. Create a Container to use
+4. Modify configurations in `config.py`
 
 ### Prerequesites
 
