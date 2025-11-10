@@ -45,6 +45,14 @@ The parser used is a modified version of this one: [xml2jsonParser](https://gith
    - Size of logs < Size specified in `config.py`: just saves the logs for now
    - Size of logs > Size specified in `config.py`: logs get zipped and / or uploaded to blob-storage
 
+## Size of outputs
+
+When testing I could get the following results when playing around with differente compression levels from `config.py`.
+- level 1: 200mb raw data -> 10-15mb zipped
+- level 9: 200mb raw data -> 6-8mb zipped
+
+This is because a lot of data repeats itself and so the compression works wonders.
+
 ## How to install and run
 
 ### Configuration-file
